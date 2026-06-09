@@ -1,41 +1,47 @@
-  {% extends 'base.html' %}
-  {% block title %}Times{% endblock %}
-  {% block content %}
+{% extends 'base.html' %}
+{% block title %}Times{% endblock %}
+{% block content %}
 
-  <h1 class="font-display text-4xl text-green-400 mb-8 tracking-wider">🏟️ TIMES</h1>
+<h1 class="font-display text-4xl text-green-400 mb-8 tracking-wider">🏟️ TIMES</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {% for time in times %}
-  <a href="{% url 'time-detalhe' time.pk %}">
-    <div class="bg-gray-900 border border-gray-800 hover:border-green-500/50 rounded-xl p-6 transition cursor-pointer">
-
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+{% for time in times %}
+<a href="{% url 'time-detalhe' time.pk %}" class="block group">
+  <div class="bg-gray-900 border border-gray-800 hover:border-green-500/50 rounded-xl p-5 transition-all duration-300 cursor-pointer flex flex-col gap-4 shadow-lg hover:-translate-y-1">
+    
+    <div class="flex items-center gap-4">
       {% if time.escudo %}
-    <img src="{{ time.escudo.url }}" class="w-14 h-14 rounded-full object-cover">
-  {% else %}
-    <span class="font-display text-2xl text-green-400">{{ time.nome|slice:":1" }}</span>
-  {% endif %}
-
-      <!-- Infos -->
-      <div class="space-y-2 text-sm">
-        <div class="flex items-center gap-2 text-gray-400">
-          <span>📍</span>
-          <span>{{ time.cidade }}</span>
+        <img src="{{ time.escudo.url }}" class="w-12 h-12 rounded-full object-cover border border-gray-800">
+      {% else %}
+        <div class="w-12 h-12 rounded-xl bg-gray-800 border border-gray-700 flex items-center justify-center group-hover:bg-green-950/40 transition-colors">
+          <span class="font-display text-xl text-green-400 font-bold">{{ time.nome|slice:":1" }}</span>
         </div>
-        <div class="flex items-center gap-2 text-gray-400">
-          <span>🏟️</span>
-          <span>{{ time.estadio }}</span>
-        </div>
-        <div class="flex items-center gap-2 text-gray-400">
-          <span>👤</span>
-          <span>{{ time.tecnico }}</span>
-        </div>
+      {% endif %}
+      
+      <div>
+        <h2 class="font-display text-lg font-bold text-white tracking-wide group-hover:text-green-400 transition-colors">{{ time.nome }}</h2>
+        <p class="text-gray-500 text-xs flex items-center gap-1 mt-0.5">
+          <span>📍</span> <span>{{ time.cidade|default:"Não informada" }}</span>
+        </p>
       </div>
-
     </div>
-  </a>
-  {% empty %}
-  <p class="text-gray-500">Nenhum time cadastrado ainda.</p>
-  {% endfor %}
-  </div>
 
-  {% endblock %}
+    <div class="border-t border-gray-800/60 pt-3 space-y-2 text-xs">
+      <div class="flex items-center gap-2 text-gray-400">
+        <span>🏟️</span>
+        <span class="truncate">{{ time.estadio|default:"Não informado" }}</span>
+      </div>
+      <div class="flex items-center gap-2 text-gray-400">
+        <span>👤</span>
+        <span class="truncate">{{ time.tecnico|default:"Não informado" }}</span>
+      </div>
+    </div>
+
+  </div>
+</a>
+{% empty %}
+<p class="text-gray-500 col-span-full text-center py-8">Nenhum time cadastrado ainda.</p>
+{% endfor %}
+</div>
+
+{% endblock %}

@@ -7,7 +7,6 @@ from times.models import Time
 from jogadores.models import Jogador
 from campeonatos.models import Campeonato
 
-
 def dashboard(request):
     # Totais gerais
     total_partidas = Partida.objects.filter(status='EN').count()
@@ -15,11 +14,10 @@ def dashboard(request):
     total_times = Time.objects.count()
     total_jogadores = Jogador.objects.count()
 
-    # Últimas partidas realizadas
+    # Partidas e status
     ultimas_partidas = Partida.objects.filter(status='EN').order_by('-data')[:5]
-
-    # Partidas ao vivo
     ao_vivo = Partida.objects.filter(status='AO')
+    partidas = Partida.objects.all().order_by('data')  # Lista todas para o painel principal
 
     # Artilheiros
     artilheiros = Jogador.objects.annotate(
@@ -30,38 +28,10 @@ def dashboard(request):
     cartoes_amarelos = Evento.objects.filter(tipo='CAR').count()
     cartoes_vermelhos = Evento.objects.filter(tipo='VER').count()
 
-    # Classificação
-    times = Time.objects.all()
-    classificacao = []
-    for time in times:
-        vitorias = Partida.objects.filter(status='EN').filter(
-            Q(time_casa=time, gols_casa__gt=F('gols_visitante')) |
-            Q(time_visitante=time, gols_visitante__gt=F('gols_casa'))
-        ).count()
-        empates = Partida.objects.filter(
-            status='EN', gols_casa=F('gols_visitante')
-        ).filter(Q(time_casa=time) | Q(time_visitante=time)).count()
-        derrotas = Partida.objects.filter(status='EN').filter(
-            Q(time_casa=time, gols_casa__lt=F('gols_visitante')) |
-            Q(time_visitante=time, gols_visitante__lt=F('gols_casa'))
-        ).count()
-        jogos = vitorias + empates + derrotas
-        pontos = (vitorias * 3) + empates
-        if jogos > 0:
-            classificacao.append({
-                'time': time,
-                'jogos': jogos,
-                'vitorias': vitorias,
-                'empates': empates,
-                'derrotas': derrotas,
-                'pontos': pontos,
-            })
-    classificacao.sort(key=lambda x: (x['pontos'], x['vitorias']), reverse=True)
-
-    # Dados para o formulário
+    # Dados para os formulários de criação e gerenciamento manual
     todos_times = Time.objects.all()
     campeonatos = Campeonato.objects.all()
-    todas_partidas = Partida.objects.exclude(status='EN').order_by('-data')
+    todas_partidas = Partida.objects.all().order_by('-data')
     todos_jogadores = Jogador.objects.all()
 
     context = {
@@ -71,10 +41,10 @@ def dashboard(request):
         'total_jogadores': total_jogadores,
         'ultimas_partidas': ultimas_partidas,
         'ao_vivo': ao_vivo,
+        'partidas': partidas,
         'artilheiros': artilheiros,
         'cartoes_amarelos': cartoes_amarelos,
         'cartoes_vermelhos': cartoes_vermelhos,
-        'classificacao': classificacao,
         'todos_times': todos_times,
         'campeonatos': campeonatos,
         'todas_partidas': todas_partidas,
@@ -128,7 +98,6 @@ def registrar_evento(request, partida_id):
             evento.jogador_id = jogador_id
         evento.save()
 
-        # Atualiza placar se for gol
         if tipo == 'GOL' and jogador_id:
             jogador = Jogador.objects.get(pk=jogador_id)
             if jogador.time == partida.time_casa:

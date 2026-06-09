@@ -5,14 +5,13 @@
 {% if messages %}
 {% for msg in messages %}
 <div class="bg-green-500/20 border border-green-500/40 text-green-400 px-4 py-3 rounded-lg mb-4 text-sm">
-  ✅ {{ msg }}
+   ✅ {{ msg }}
 </div>
 {% endfor %}
 {% endif %}
 
 <h1 class="font-display text-4xl text-green-400 mb-6 tracking-wider">⚽ DASHBOARD</h1>
 
-<!-- Abas -->
 <div class="flex gap-2 mb-8 border-b border-gray-800">
   <button onclick="trocarAba('visao')" id="btn-visao"
     class="aba-btn px-5 py-2 text-sm font-medium border-b-2 border-green-400 text-green-400 transition">
@@ -24,10 +23,8 @@
   </button>
 </div>
 
-<!-- ABA: VISÃO GERAL -->
 <div id="aba-visao">
 
-  <!-- Cards -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 text-center">
       <div class="text-3xl font-bold text-green-400">{{ total_gols }}</div>
@@ -63,38 +60,39 @@
   {% endif %}
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-      <h2 class="font-display text-xl text-green-400 tracking-wider mb-4">🏆 CLASSIFICAÇÃO</h2>
-      {% if classificacao %}
+      <h2 class="font-display text-xl text-green-400 tracking-wider mb-4">📊 DESEMPENHO DOS CLUBES</h2>
       <table class="w-full text-sm">
         <thead>
           <tr class="text-gray-500 border-b border-gray-800">
             <th class="text-left pb-2">#</th>
             <th class="text-left pb-2">Time</th>
             <th class="text-center pb-2">J</th>
-            <th class="text-center pb-2">V</th>
+            <th class="text-center pb-2 text-green-400">V</th>
             <th class="text-center pb-2">E</th>
-            <th class="text-center pb-2">D</th>
-            <th class="text-center pb-2 text-green-400">P</th>
+            <th class="text-center pb-2 text-red-400">D</th>
           </tr>
         </thead>
         <tbody>
-          {% for item in classificacao %}
+          {% for item in desempenho_times %}
           <tr class="border-b border-gray-800/50 hover:bg-gray-800/30">
             <td class="py-2 text-gray-500">{{ forloop.counter }}</td>
-            <td class="py-2 font-medium">{{ item.time.nome }}</td>
+            <td class="py-2 font-medium text-white">{{ item.time.nome }}</td>
             <td class="py-2 text-center text-gray-400">{{ item.jogos }}</td>
-            <td class="py-2 text-center text-green-400">{{ item.vitorias }}</td>
+            <td class="py-2 text-center font-bold text-green-400">{{ item.vitorias }}</td>
             <td class="py-2 text-center text-gray-400">{{ item.empates }}</td>
             <td class="py-2 text-center text-red-400">{{ item.derrotas }}</td>
-            <td class="py-2 text-center font-bold text-white">{{ item.pontos }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="py-4 text-gray-600 text-sm italic text-center">
+              Nenhum dado disponível. Encerre partidas para calcular.
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
-      <p class="text-gray-600 text-sm">Nenhuma partida encerrada ainda.</p>
-      {% endif %}
     </div>
 
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -146,10 +144,8 @@
 
 </div>
 
-<!-- ABA: GERENCIAR -->
 <div id="aba-gerenciar" class="hidden space-y-6">
 
-  <!-- Nova Partida -->
   <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
     <h2 class="font-display text-xl text-green-400 tracking-wider mb-4">➕ NOVA PARTIDA</h2>
     <form method="POST" action="{% url 'nova-partida' %}">
@@ -190,14 +186,12 @@
     </form>
   </div>
 
-  <!-- Gerenciar Partidas Existentes -->
   <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
     <h2 class="font-display text-xl text-green-400 tracking-wider mb-4">⚙️ GERENCIAR PARTIDAS</h2>
     {% if todas_partidas %}
     {% for partida in todas_partidas %}
     <div class="border border-gray-800 rounded-xl p-4 mb-4">
 
-      <!-- Cabeçalho da partida -->
       <div class="flex items-center justify-between mb-3">
         <span class="font-medium text-white">
           {{ partida.time_casa.nome }} x {{ partida.time_visitante.nome }}
@@ -210,7 +204,6 @@
         </span>
       </div>
 
-      <!-- Alterar Status -->
       <form method="POST" action="{% url 'alterar-status' partida.pk %}" class="flex gap-2 mb-3">
         {% csrf_token %}
         <select name="status" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm">
@@ -223,7 +216,6 @@
         </button>
       </form>
 
-      <!-- Registrar Evento -->
       <form method="POST" action="{% url 'registrar-evento' partida.pk %}" class="grid grid-cols-2 md:grid-cols-4 gap-2">
         {% csrf_token %}
         <select name="tipo" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm">
@@ -256,7 +248,6 @@
 
 </div>
 
-<!-- Script das abas -->
 <script>
   function trocarAba(aba) {
     document.getElementById('aba-visao').classList.add('hidden');
